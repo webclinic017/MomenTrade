@@ -32,8 +32,8 @@ class Bollinger(bt.Strategy):
     def __init__(self):
         self.sma20 = bt.indicators.SimpleMovingAverage(self.data.close, period=20)
         self.stddev20 = bt.indicators.StandardDeviation(self.data.close, period=20)
-        self.upper_track = self.sma20 + 3 * self.stddev20  # 布林带上轨
-        self.lower_track = self.sma20 - 3 * self.stddev20  # 布林带下轨
+        self.upper_track = self.sma20 + 2 * self.stddev20  # 布林带上轨
+        self.lower_track = self.sma20 - 2 * self.stddev20  # 布林带下轨
 
     def next(self):
         size = int(self.broker.getcash() / self.data.close[0] * 0.9)

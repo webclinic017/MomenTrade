@@ -50,9 +50,12 @@ finally:
 consequence = []
 for i in stock_list:
     i = i[0]
-    prepare.main(i, "20230619", "20240828")
-    j = MomenTrade.main("20230619", "20240828", i)
-    # j = Bollinger_Band.main("20230619", "20240828", i)
-    if abs(j) > 0.1:
-        consequence.append((i, j))
+    try:
+        prepare.main(i, "20220619", "20230828")
+        j = MomenTrade.main("20220619", "20230828", i)
+        # j = Bollinger_Band.main("20230619", "20240828", i)
+        if abs(j) > 0.1:
+            consequence.append((i, j))
+    except:
+        pass
 write_to_csv(consequence, "consequence.csv")
