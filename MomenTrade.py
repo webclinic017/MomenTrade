@@ -69,7 +69,7 @@ def main(date1, date2, code):
 
     # 自定义策略
     class MyStrategy(bt.Strategy):
-        buy_day = -1
+        state = ""
         price = -1
 
         def __init__(self):
@@ -92,12 +92,28 @@ def main(date1, date2, code):
             return tmp_pos, sum, pos - tmp_pos
 
         def next(self):
-            if self.buy_day >= 0:
+            if self.state == "stop":
+                if (
+                    self.data.close[0] > self.data.open[0]
+                    and self.data.close[-1] > self.data.open[-1]
+                ):
+                    cash = self.broker.getcash()
+                    price = self.data.close[0]
+                    self.buy(size=int(cash / price * 0.9))
+                    self.state = "open"
+                    return
+            if self.state == "open":
+                if (
+                    self.data.close[0] < self.data.open[0]
+                    and self.data.close[-1] < self.data.open[-1]
+                ):
+                    self.sell(size=self.position.size)
+                    self.state = "stop"
+                    return
                 if self.data.close[0] < self.upper_track[0]:
-                    self.buy_day += 1
                     return
                 self.sell(size=self.position.size)
-                self.buy_day = -1
+                self.state = "close"
                 return
 
             if self.data.close[0] > self.lower_track[0]:
@@ -151,7 +167,7 @@ def main(date1, date2, code):
                         time = self.data.datetime.date(0)
                         cash = self.broker.getcash()
                         self.buy(size=int(cash / price * 0.9))
-                        self.buy_day = 0
+                        self.state = "open"
 
     cerebro = bt.Cerebro()
 
@@ -198,7 +214,7 @@ def main(date1, date2, code):
     print(f"Total Return Percentage: {total_return_percentage:.2f}%")
     print(f"Average Annualized Return Percentage: {annualized_return_percentage:.2f}%")
 
-    # matplotlib.use("agg")
+    matplotlib.use("agg")
     if abs(annualized_return_percentage) > 0.1:
         figs = cerebro.plot(style="candle", **tq_ksty07)
         fig = figs[0][0]
@@ -207,6 +223,6 @@ def main(date1, date2, code):
 
 
 if __name__ == "__main__":
-    date1 = "20210619"
-    date2 = "20220828"
-    main(date1, date2, "300699")
+    date1 = "20230830"
+    date2 = "20240830"
+    main(date1, date2, "002790")

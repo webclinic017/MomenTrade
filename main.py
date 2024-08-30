@@ -2,9 +2,9 @@ import MomenTrade
 import prepare
 import pymysql
 import csv
+import os
 
 # import Bollinger_Band
-
 config = {
     "host": "127.0.0.1",
     "port": 3306,
@@ -47,12 +47,31 @@ finally:
     # 关闭连接
     if connection:
         connection.close()
+
+with open("stock_list.txt", "w") as f:
+    for stock in stock_list:
+        f.write(stock[0] + "\n")
+
 consequence = []
+
+year = 2023
+
+folder_path = str(year)
+
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+
+os.chdir(folder_path)
+
+if not os.path.exists("photo"):
+    os.makedirs("photo")
+date1 = str(year) + "0830"
+date2 = str(year + 1) + "0830"
 for i in stock_list:
     i = i[0]
     try:
-        prepare.main(i, "20220619", "20230828")
-        j = MomenTrade.main("20220619", "20230828", i)
+        prepare.main(i, date1, date2)
+        j = MomenTrade.main(date1, date2, i)
         # j = Bollinger_Band.main("20230619", "20240828", i)
         if abs(j) > 0.1:
             consequence.append((i, j))
