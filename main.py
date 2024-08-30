@@ -54,7 +54,7 @@ with open("stock_list.txt", "w") as f:
 
 consequence = []
 
-year = 2023
+year = 2020
 
 folder_path = str(year)
 
