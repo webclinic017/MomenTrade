@@ -3,3 +3,6 @@ photo/
 *.png
 *.csv
 *.txt
+dist/
+build/
+*.spec

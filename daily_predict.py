@@ -164,6 +164,7 @@ def main():
         print("已处理 " + str(cnt) + ", 总共 " + str(len(stock_list)))
 
     print(stdout)
+    input("按任意键继续...")
 
 
 if __name__ == "__main__":
