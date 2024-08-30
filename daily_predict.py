@@ -19,7 +19,6 @@ def posein(pos, line):
 
 def main():
     now = datetime.now()
-    now = datetime(2024, 1, 26)
     days_ago = now - timedelta(days=120)
     strdate = now.strftime("%Y%m%d")
     strdate2 = days_ago.strftime("%Y%m%d")
@@ -89,8 +88,6 @@ def main():
     cnt = 0
     stdout = ""
     for i in stock_list:
-        if i == "002790":
-            print("df")
         cnt += 1
         try:
             df = hist_em.stock_zh_a_hist(
