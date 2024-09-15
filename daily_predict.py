@@ -23,11 +23,7 @@ def main():
     strdate = now.strftime("%Y%m%d")
     strdate2 = days_ago.strftime("%Y%m%d")
 
-    stock_list = []
-
-    with open("stock_list.txt", "r") as f:
-        for line in f.readlines():
-            stock_list.append(line.strip())
+    stock_list = [i for i in hist_em.code_id_map_em().keys()]
 
     with open("log.txt", "a") as f:
         pass

@@ -2,8 +2,8 @@ import MomenTrade
 import prepare
 import csv
 import os
-import stock_hist_em as sh
-
+import future_crawler as fc
+import Bollinger_Band as bb
 
 # # import Bollinger_Band
 # config = {
@@ -25,7 +25,7 @@ def write_to_csv(data, filename):
 
 
 # 目标字段列表
-stock_list = [i for i in sh.code_id_map_em().keys()]
+stock_list = [i.upper() for i in fc.return_future_list()]
 
 # try:
 #     # 创建连接
@@ -52,10 +52,14 @@ stock_list = [i for i in sh.code_id_map_em().keys()]
 # with open("stock_list.txt", "w") as f:
 #     for stock in stock_list:
 #         f.write(stock[0] + "\n")
+if not os.path.exists("future"):
+    os.makedirs("future")
+
+os.chdir("future")
 
 consequence = []
 
-year = 2021
+year = 2020
 
 folder_path = str(year)
 
@@ -67,10 +71,10 @@ os.chdir(folder_path)
 if not os.path.exists("photo"):
     os.makedirs("photo")
 date1 = str(year) + "0830"
-date2 = str(year + 1) + "0830"
+date2 = str(year + 30) + "0830"
 for i in stock_list:
     try:
-        prepare.main(i, date1, date2)
+        prepare.main_future(i, date1, date2)
         j = MomenTrade.main(date1, date2, i)
         # j = Bollinger_Band.main("20230619", "20240828", i)
         if abs(j) > 0.1:

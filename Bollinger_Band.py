@@ -1,4 +1,5 @@
 import backtrader as bt
+import matplotlib
 import pandas as pd
 from datetime import datetime
 from backtrader.feeds import GenericCSVData
@@ -99,7 +100,7 @@ def main(date1, date2, code):
     print(f"Total Return Percentage: {total_return_percentage:.2f}%")
     print(f"Average Annualized Return Percentage: {annualized_return_percentage:.2f}%")
 
-    # matplotlib.use("agg")
+    matplotlib.use("agg")
     if abs(annualized_return_percentage) > 0.1:
         figs = cerebro.plot(style="candle", **tq_ksty07)
         fig = figs[0][0]
