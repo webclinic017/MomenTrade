@@ -55,7 +55,7 @@ stock_list = [i for i in sh.code_id_map_em().keys()]
 
 consequence = []
 
-year = 2021
+year = 2022
 
 folder_path = str(year)
 

@@ -71,12 +71,13 @@ def main(date1, date2, code):
     class MyStrategy(bt.Strategy):
         state = ""
         price = -1
+        retry_cnt = 3
 
         def __init__(self):
             self.sma20 = bt.indicators.SimpleMovingAverage(self.data.close, period=20)
             self.stddev20 = bt.indicators.StandardDeviation(self.data.close, period=20)
             self.upper_track = self.sma20 + self.stddev20  # 布林带上轨
-            self.lower_track = self.sma20 - self.stddev20  # 布林带下轨
+            self.lower_track = self.sma20 - 2 * self.stddev20  # 布林带下轨
 
         def posein(self, pos, line):
             if -pos > len(line):
@@ -97,6 +98,7 @@ def main(date1, date2, code):
                     self.data.close[0] > self.data.open[0]
                     and self.data.close[-1] > self.data.open[-1]
                 ):
+                    # if self.data.close[0] < self.sma20[0] - 2 * self.stddev20[0]:
                     cash = self.broker.getcash()
                     price = self.data.close[0]
                     self.buy(size=int(cash / price * 0.9))
@@ -106,9 +108,13 @@ def main(date1, date2, code):
                 if (
                     self.data.close[0] < self.data.open[0]
                     and self.data.close[-1] < self.data.open[-1]
+                    # and self.data.close[0] >= self.sma20[0] - 2 * self.stddev20[0]
                 ):
                     self.sell(size=self.position.size)
                     self.state = "stop"
+                    self.retry_cnt -= 1
+                    if self.retry_cnt == 0:
+                        self.state = "close"
                     return
                 if self.data.close[0] < self.upper_track[0]:
                     return
@@ -116,8 +122,20 @@ def main(date1, date2, code):
                 self.state = "close"
                 return
 
-            if self.data.close[0] > self.lower_track[0]:
+            if self.state == "wait":
+                self.retry_cnt -= 1
+                if self.retry_cnt == 0:
+                    self.state = "close"
+                    return
+                if self.data.close[0] > self.lower_track[0]:
+                    return
+                cash = self.broker.getcash()
+                price = self.data.close[0]
+                self.buy(size=int(cash / price * 0.9))
+                self.state = "open"
+                self.retry_cnt = 3
                 return
+
             if len(self.data) > 60:
                 line = []
                 open = []
@@ -164,10 +182,14 @@ def main(date1, date2, code):
                         and neg_len2 >= 2
                         and neg_len3 >= 2
                     ):
-                        time = self.data.datetime.date(0)
+                        if self.data.close[0] > self.lower_track[0]:
+                            self.state = "wait"
+                            self.retry_cnt = 7
+                            return
                         cash = self.broker.getcash()
                         self.buy(size=int(cash / price * 0.9))
                         self.state = "open"
+                        self.retry_cnt = 3
 
     cerebro = bt.Cerebro()
 
@@ -223,6 +245,6 @@ def main(date1, date2, code):
 
 
 if __name__ == "__main__":
-    date1 = "20230830"
-    date2 = "20240830"
-    main(date1, date2, "002790")
+    date1 = "20220830"
+    date2 = "20230830"
+    main(date1, date2, "688298")
