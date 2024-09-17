@@ -81,16 +81,40 @@ def main(date1, date2, code):
 
         def posein(self, pos, line):
             if -pos > len(line):
-                return pos, 0, False
+                return pos, 0, 0
             tmp_pos = pos - 1
             sum = line[pos]
-            while len(line) >= -tmp_pos - 1 and (
+            while len(line) > -tmp_pos + 1 and (
                 line[pos] * line[tmp_pos] > 0
                 or line[pos] * (line[tmp_pos] + line[tmp_pos - 1]) > 0
             ):
                 sum += line[tmp_pos]
                 tmp_pos -= 1
             return tmp_pos, sum, pos - tmp_pos
+
+        def recognize(self, close, line):
+            pos, _, neg_len1 = self.posein(-1, line)
+            pos, _, pos_len1 = self.posein(pos, line)
+            if pos_len1 < 3:
+                return False
+            pos_max1 = max(close[pos + 1 : pos + pos_len1 + 1])
+            pos, _, neg_len2 = self.posein(pos, line)
+            if neg_len2 < 3:
+                return False
+            neg_min2 = min(close[pos + 1 : pos + neg_len2 + 1])
+            pos, _, pos_len2 = self.posein(pos, line)
+            if pos_len2 < 3:
+                return False
+            pos_min2 = min(close[pos + 1 : pos + pos_len2 + 1])
+            if (
+                (pos_min2 <= pos_max1 or neg_min2 >= pos_min2)
+                and neg_len1 >= 3
+                and pos_len1 >= 3
+                and neg_len2 >= 3
+                and pos_len2 >= 3
+            ):
+                return True
+            return False
 
         def next(self):
             if self.state == "stop":
@@ -182,14 +206,26 @@ def main(date1, date2, code):
                         and neg_len2 >= 2
                         and neg_len3 >= 2
                     ):
-                        if self.data.close[0] > self.lower_track[0]:
-                            self.state = "wait"
-                            self.retry_cnt = 7
-                            return
-                        cash = self.broker.getcash()
-                        self.buy(size=int(cash / price * 0.9))
-                        self.state = "open"
-                        self.retry_cnt = 3
+                        # if self.data.close[0] > self.lower_track[0]:
+                        #     self.state = "wait"
+                        #     self.retry_cnt = 7
+                        #     return
+                        line = line[:pos]
+                        open = open[:pos]
+                        close = close[:pos]
+                        flag = False
+                        while len(line) > 10:
+                            if self.recognize(close, line):
+                                flag = True
+                                break
+                            line.pop()
+                            open.pop()
+                            close.pop()
+                        if flag:
+                            cash = self.broker.getcash()
+                            self.buy(size=int(cash / price * 0.9))
+                            self.state = "open"
+                            self.retry_cnt = 3
 
     cerebro = bt.Cerebro()
 
