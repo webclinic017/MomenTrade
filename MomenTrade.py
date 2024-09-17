@@ -1,6 +1,6 @@
 import backtrader as bt
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from backtrader.feeds import GenericCSVData
 import numpy as np
 import matplotlib
@@ -92,30 +92,6 @@ def main(date1, date2, code):
                 tmp_pos -= 1
             return tmp_pos, sum, pos - tmp_pos
 
-        def recognize(self, close, line):
-            pos, _, neg_len1 = self.posein(-1, line)
-            pos, _, pos_len1 = self.posein(pos, line)
-            if pos_len1 < 3:
-                return False
-            pos_max1 = max(close[pos + 1 : pos + pos_len1 + 1])
-            pos, _, neg_len2 = self.posein(pos, line)
-            if neg_len2 < 3:
-                return False
-            neg_min2 = min(close[pos + 1 : pos + neg_len2 + 1])
-            pos, _, pos_len2 = self.posein(pos, line)
-            if pos_len2 < 3:
-                return False
-            pos_min2 = min(close[pos + 1 : pos + pos_len2 + 1])
-            if (
-                (pos_min2 <= pos_max1 or neg_min2 >= pos_min2)
-                and neg_len1 >= 3
-                and pos_len1 >= 3
-                and neg_len2 >= 3
-                and pos_len2 >= 3
-            ):
-                return True
-            return False
-
         def next(self):
             if self.state == "stop":
                 if (
@@ -162,11 +138,11 @@ def main(date1, date2, code):
 
             if len(self.data) > 60:
                 line = []
-                open = []
+                open_ = []
                 close = []
                 for i in range(59, -1, -1):
                     line.append(self.data.close[-i] - self.data.open[-i])
-                    open.append(self.data.open[-i])
+                    open_.append(self.data.open[-i])
                     close.append(self.data.close[-i])
                 if (
                     line[-1] > 0
@@ -186,7 +162,7 @@ def main(date1, date2, code):
                     pos, pos_sum2, pos_len2 = self.posein(pos, line)
                     pos_max2 = max(close[pos + 1 : pos + pos_len2 + 1])
                     pos, neg_sum3, neg_len3 = self.posein(pos, line)
-                    neg_max3 = max(open[pos + 1 : pos + neg_len3 + 1])
+                    neg_max3 = max(open_[pos + 1 : pos + neg_len3 + 1])
                     neg_min3 = min(close[pos + 1 : pos + neg_len3 + 1])
                     distinct = abs(neg_len2 - neg_len3)
                     min_ = max(min(neg_len2, neg_len3) - distinct, 2)
@@ -206,26 +182,42 @@ def main(date1, date2, code):
                         and neg_len2 >= 2
                         and neg_len3 >= 2
                     ):
-                        # if self.data.close[0] > self.lower_track[0]:
-                        #     self.state = "wait"
-                        #     self.retry_cnt = 7
-                        #     return
-                        line = line[:pos]
-                        open = open[:pos]
-                        close = close[:pos]
                         flag = False
-                        while len(line) > 10:
-                            if self.recognize(close, line):
-                                flag = True
-                                break
-                            line.pop()
-                            open.pop()
-                            close.pop()
-                        if flag:
-                            cash = self.broker.getcash()
-                            self.buy(size=int(cash / price * 0.9))
-                            self.state = "open"
-                            self.retry_cnt = 3
+                        with open("zs.txt", "r") as f:
+                            for i in f.readlines():
+                                dates_str = i.strip()
+                                # 将字符串分割成列表
+                                dates_list = dates_str.split(",")
+
+                                # 转换为datetime对象
+                                dates = [
+                                    datetime.strptime(date, "%Y%m%d")
+                                    for date in dates_list
+                                ]
+                                dt1 = dates[0]
+                                dt2 = dates[1]
+                                # 计算dt1和dt2之间的天数差
+                                days_diff = (dt2 - dt1).days
+
+                                # 将天数差加到dt2上得到新的日期
+                                dt3 = dt2 + timedelta(days=days_diff)
+                                dt_from = bt.num2date(
+                                    self.data.datetime[0]
+                                ) + timedelta(days=pos)
+                                if dt_from < dt3 and dt_from > dt2:
+                                    flag = True
+                                    break
+                        # if flag == False:
+                        #     return
+
+                        if self.data.close[0] > self.lower_track[0]:
+                            self.state = "wait"
+                            self.retry_cnt = 7
+                            return
+                        cash = self.broker.getcash()
+                        self.buy(size=int(cash / price * 0.9))
+                        self.state = "open"
+                        self.retry_cnt = 3
 
     cerebro = bt.Cerebro()
 
