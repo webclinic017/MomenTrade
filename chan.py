@@ -39,6 +39,7 @@ from importlib import reload
 from enum import Enum
 from abc import ABCMeta, abstractmethod, ABC
 
+import matplotlib
 import requests
 import backtrader as bt
 import pandas as pd
@@ -51,6 +52,7 @@ from fastapi.templating import Jinja2Templates
 from termcolor import colored
 from backtrader.feeds import GenericCSVData
 
+global_bi = []
 
 ts2int = lambda timestamp_str: int(
     time.mktime(
@@ -1385,9 +1387,14 @@ class Bi(BaseChanObject, Observer):
         if _from == "analyzer":
             with open("bi.txt", "a", encoding="utf-8") as f:
                 f.write(
-                    f"{bi.direction}, {bi.start.dt.strftime('%Y%m%d')}, {bi.start.speck}, "
-                    f"{bi.end.dt.strftime('%Y%m%d')}, {bi.end.speck}\n"
+                    f"{bi.direction},{bi.start.dt.strftime('%Y%m%d')},{bi.start.speck},"
+                    f"{bi.end.dt.strftime('%Y%m%d')},{bi.end.speck}\n"
                 )
+            global global_bi
+            global_bi.append(
+                f"{bi.direction},{bi.start.dt.strftime('%Y%m%d')},{bi.start.speck},"
+                f"{bi.end.dt.strftime('%Y%m%d')},{bi.end.speck}\n"
+            )
             bi.notify_observer(cmd=Bi.CMD_APPEND, obj=bi)
             ZhongShu.analyzer_push(bi, ZhongShu.BI_OBJS, Bi.OBJS, 0, _from)
             Duan.analyzer_append(bi, Duan.OBJS, 0, _from)
@@ -3312,6 +3319,9 @@ class Bitstamp(CZSCAnalyzer):
 
 
 class CZSCStrategy(bt.Strategy):  # BOLL策略程序
+    buy_price = 0
+    state = "close"
+
     def __init__(self):  # 初始化
         self.data_close = self.datas[0].close  # 指定价格序列
         # 初始化交易指令、买卖价格和手续费
@@ -3334,7 +3344,7 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
         v = self.datas[0].volume[0]
         self.base_analyzer.step(bt.num2date(dt), o, h, l, c, v)
         if Observer.sigal:
-            t, bar, bst = Observer.sigal
+            t, bar, _ = Observer.sigal
             offset = NewBar.OBJS[-1].index - bar.index
             if offset > 2:
                 return
@@ -3342,9 +3352,85 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
                 return
             self.signals.add(Observer.sigal)
             # print(t, bar, bst)
-
+        bi = []
+        global global_bi
+        for i in global_bi:
+            tmp = i.strip().split(",")
+            if len(bi) == 0 or bi[-1][0] != tmp[0]:
+                bi.append(tmp)
+            else:
+                bi[-1] = tmp
+        price = self.data.close[0]
+        if self.position:
+            if bi[-1][0] == "Up" and price < float(bi[-1][4]):
+                self.sell(size=self.position.size)
+                self.state = "stop"
+            elif price < self.buy_price:
+                self.sell(size=self.position.size)
+                self.state = "close"
+        elif self.state == "stop":
+            if bi[-1][0] == "Down":
+                self.state = "close"
+            elif price > float(bi[-1][4]):
+                cash = self.broker.getcash()
+                self.buy(size=int(cash / price * 0.9))
+                self.buy_price = price
+                self.state = "open"
+        elif len(bi) > 5 and price > float(bi[-1][4]):
+            if self.module2(bi):
+                cash = self.broker.getcash()
+                self.buy(size=int(cash / price * 0.9))
+                self.buy_price = price
+                self.state = "open"
         Observer.sigal = None
         return
+
+    def module(self, bi: list[list]) -> bool:
+        if len(bi) < 6 or bi[-1][0] == "Up":
+            return False
+        bi = bi[-6:]
+        len_ = [abs(float(i[2]) - float(i[4])) for i in bi]
+        result = self.cv_cal(len_[:3])
+        if result > 0.2:
+            return False
+        result = self.cv_cal(len_[1:4])
+        if result < 0.2:
+            return False
+        if (
+            False
+            # float(bi[4][4]) > float(bi[1][4])
+            # or float(bi[4][4]) > float(bi[0][2])
+            # or len_[5] > len_[3]
+        ):
+            return False
+        return True
+
+    def module2(self, bi: list[list]) -> bool:
+        if len(bi) < 8 or bi[-1][0] == "Up":
+            return False
+        bi = bi[-8:]
+        len_ = [abs(float(i[2]) - float(i[4])) for i in bi]
+        result = self.cv_cal(len_[:3])
+        if result > 0.2 or float(bi[3][4]) < float(bi[0][2]):
+            return False
+        if float(bi[1][4]) < float(bi[3][4]):
+            return False
+        if (
+            self.cv_cal(len_[4:8]) < 0.2
+            or len_[4] > len_[3]
+            or len_[4] > len_[5]
+            or len_[6] > len_[5]
+            or len_[6] > len_[7]
+            # len_[4] + len_[6]
+            # > len_[5]
+            # or len_[5] > len_[3]
+            # or len_[7] > len_[5]
+        ):
+            return False
+        return True
+
+    def cv_cal(self, float_list: list[float]):
+        return np.std(float_list) / np.mean(float_list)
 
     def log(self, txt, dt=None, do_print=False):  # 日志函数
         dt = dt or bt.num2date(self.datas[0].datetime[0])
@@ -4007,7 +4093,9 @@ manager = ConnectionManager()
 Observer.TIME = 0.02
 
 
-def main(from_date, to_date):
+def main(code, from_date, to_date):
+    global global_bi
+    global_bi = []
     with open("zs.txt", "w") as f:
         pass
     with open("bi.txt", "w") as f:
@@ -4033,7 +4121,8 @@ def main(from_date, to_date):
     # 添加数据到回测引擎
     cerebro.adddata(data)
     cerebro.addstrategy(CZSCStrategy)
-    cerebro.broker.setcash(1000000)
+    start_cash = 10000
+    cerebro.broker.setcash(start_cash)
     cerebro.broker.setcommission(commission=0.0005)
     # cerebro.addsizer(bt.sizers.FixedSize, stake=100)
     cerebro.run(runonce=False)
@@ -4043,9 +4132,28 @@ def main(from_date, to_date):
     tq_ksty07 = dict(
         volup=tq07_corUp, voldown=tq07_corDown, barup=tq07_corUp, bardown=tq07_corDown
     )
-    cerebro.plot(style="candle", **tq_ksty07)
+    # cerebro.plot(style="candle", **tq_ksty07) 
     print(len(Observer.sigals))
+
+    # 计算总收益率
+    total_return_percentage = ((end_value - start_cash) / start_cash) * 100
+
+    # 假设回测周期是从date1到date2，计算总天数
+    total_days = (todate - fromdate).days
+    # 假设一年有365天，计算平均年化收益率
+    annualized_return_percentage = (
+        (1 + total_return_percentage / 100) ** (365 / total_days)
+    ) - 1
+    annualized_return_percentage *= 100  # 转换为百分比形式
+    print(f"Average Annualized Return Percentage: {annualized_return_percentage:.2f}%")
+
+    matplotlib.use("agg")
+    if abs(annualized_return_percentage) > 0.1:
+        figs = cerebro.plot(style="candle", **tq_ksty07)
+        fig = figs[0][0]
+        fig.savefig("photo/" + code + ".png")
+    return annualized_return_percentage
 
 
 if __name__ == "__main__":
-    main("20220830", "20230830")
+    main("002250", "20220830", "20230830")

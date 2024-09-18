@@ -1,4 +1,4 @@
-import MomenTrade
+import chan
 import prepare
 import csv
 import os
@@ -71,7 +71,7 @@ date2 = str(year + 1) + "0830"
 for i in stock_list:
     try:
         prepare.main(i, date1, date2)
-        j = MomenTrade.main(date1, date2, i)
+        j = chan.main(i, date1, date2)
         # j = Bollinger_Band.main("20230619", "20240828", i)
         if abs(j) > 0.1:
             consequence.append((i, j))
