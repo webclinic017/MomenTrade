@@ -30,7 +30,6 @@ def main():
 
     cnt = 0
     stdout = ""
-    error_list = []
     for i in stock_list:
         cnt += 1
         state = "close"
@@ -45,14 +44,10 @@ def main():
                 with open("log.txt", "a") as f:
                     f.write(" ".join([i, new_state]) + "\n")
         except:
-            error_list.append(i)
+            pass
         print("已处理 " + str(cnt) + ", 总共 " + str(len(stock_list)))
 
     print(stdout)
-    print("ERROR: ", end="")
-    for i in error_list:
-        print(i, end=" ")
-    print("\n")
     input("按任意键继续...")
 
 
