@@ -53,6 +53,7 @@ from termcolor import colored
 from backtrader.feeds import GenericCSVData
 
 global_bi = []
+global_state = ""
 
 ts2int = lambda timestamp_str: int(
     time.mktime(
@@ -183,7 +184,9 @@ def _print(*args, **kwords):
         else:
             result.append(i)
     result = tuple(result)
-    print(*result, **kwords)
+
+
+# print(*result, **kwords)
 
 
 def dp(*args, **kwords):
@@ -279,7 +282,7 @@ def triple_relation(
             shape = Shape.G
         if mr is Direction.Left:
             # 顺序包含
-            print("顺序包含 mr")
+            # print("顺序包含 mr")
             raise ChanException("顺序包含 mr")
         if mr is Direction.Right and use_right:
             # 逆序包含
@@ -295,7 +298,7 @@ def triple_relation(
             shape = Shape.X
         if mr is Direction.Left:
             # 顺序包含
-            print("顺序包含 mr")
+            # print("顺序包含 mr")
             raise ChanException("顺序包含 mr")
         if mr is Direction.Right and use_right:
             # 逆序包含
@@ -303,7 +306,7 @@ def triple_relation(
 
     if lm is Direction.Left:
         # 顺序包含
-        print("顺序包含 lm")
+        # print("顺序包含 lm")
         raise ChanException("顺序包含 lm")
 
     if lm is Direction.Right and use_right:
@@ -316,7 +319,7 @@ def triple_relation(
             shape = Shape.G
         if mr is Direction.Left:
             # 顺序包含
-            print("顺序包含 mr")
+            # print("顺序包含 mr")
             raise ChanException("顺序包含 mr")
         if mr is Direction.Right and use_right:
             # 逆序包含
@@ -436,7 +439,7 @@ class Observer(metaclass=ABCMeta):
             if (_type, bar, bsp) in Observer.sigals and real:
                 Observer.sigal = None
                 return
-            # print("plot_bsp", bar, bsp, RawBar.OBJS[-1].dt)
+            ##print("plot_bsp", bar, bsp, RawBar.OBJS[-1].dt)
 
             if bar.shape is Shape.G:
                 options = {
@@ -507,13 +510,13 @@ class Observable(object):
         assert kwords.get("obj") is self
         if Observer.CAN:
             if self.__observers is None:
-                print("警告 观察者 为 None", kwords)
+                # print("警告 观察者 为 None", kwords)
                 return
             name = self.__class__.__name__
             if name in ("Bi", "Duan", "ZhongShu", "FeatureSequence"):
-                NewBar.OBJS and print(
-                    "\n", name, NewBar.OBJS[-1].dt, kwords, self.__observers
-                )
+                NewBar.OBJS  # andprint(
+                #     "\n", name, NewBar.OBJS[-1].dt, kwords, self.__observers
+                # )
             for o in self.__observers:
                 o.update(self, **kwords)
 
@@ -1448,7 +1451,7 @@ class Bi(BaseChanObject, Observer):
                 eq = Bi.BI_EQUAL
                 Bi.BI_EQUAL = False  # 起始点检测时不考虑相同起始点情况，避免递归
                 if bi.real_high is not last.mid:
-                    # print("不是真顶")
+                    ##print("不是真顶")
                     top = bi.real_high
                     new = FenXing(
                         cklines[cklines.index(top) - 1],
@@ -1485,7 +1488,7 @@ class Bi(BaseChanObject, Observer):
                         )
                         if not nb.check():
                             return
-                        print(_bi)
+                        # print(_bi)
                         tmp = fxs.pop()
                         assert tmp is last
                         Bi.pop(bis, tmp, _from)
@@ -1512,7 +1515,7 @@ class Bi(BaseChanObject, Observer):
                 eq = Bi.BI_EQUAL
                 Bi.BI_EQUAL = False  # 起始点检测时不考虑相同起始点情况，避免递归
                 if bi.real_low is not last.mid:
-                    # print("不是真底")
+                    ##print("不是真底")
                     bottom = bi.real_low
                     new = FenXing(
                         cklines[cklines.index(bottom) - 1],
@@ -1549,7 +1552,7 @@ class Bi(BaseChanObject, Observer):
                         )
                         if not nb.check():
                             return
-                        print(_bi)
+                        # print(_bi)
                         tmp = fxs.pop()
                         assert tmp is last
                         Bi.pop(bis, tmp, _from)
@@ -1592,7 +1595,7 @@ class Bi(BaseChanObject, Observer):
                         Bi.analyzer(
                             new, fxs, bis, cklines, _from, level=level + 1
                         )  # 处理新底
-                        # print("GS修正")
+                        ##print("GS修正")
 
         elif last.shape is Shape.D and fx.shape is Shape.X:
             if last.speck > right.low:
@@ -1621,7 +1624,7 @@ class Bi(BaseChanObject, Observer):
                         Bi.analyzer(
                             new, fxs, bis, cklines, _from, level=level + 1
                         )  # 处理新顶
-                        # print("DX修正")
+                        ##print("DX修正")
 
         elif last.shape is Shape.G and fx.shape is Shape.G:
             if last.speck < fx.speck:
@@ -1653,7 +1656,7 @@ class Bi(BaseChanObject, Observer):
                         Bi.analyzer(
                             fx, fxs, bis, cklines, _from, level=level + 1
                         )  # 再处理当前顶
-                        # print("GG修正")
+                        ##print("GG修正")
                         return
 
                 if not fxs:
@@ -1698,7 +1701,7 @@ class Bi(BaseChanObject, Observer):
                         Bi.analyzer(
                             fx, fxs, bis, cklines, _from, level=level + 1
                         )  # 再处理当前底
-                        # print("DD修正")
+                        ##print("DD修正")
                         return
 
                 if not fxs:
@@ -1854,7 +1857,7 @@ class FeatureSequence(Observable, Observer):
         try:
             self.__elements.remove(obj)
         except Exception as e:
-            print(self)
+            # print(self)
             raise e
         if self.__elements:
             if _from == "analyzer":
@@ -2562,7 +2565,7 @@ class ZhongShu(BaseChanObject, Observer):
 
         if cmd in (ZhongShu.CMD_APPEND, ZhongShu.CMD_REMOVE, ZhongShu.CMD_MODIFY):
             # 后端实现 增 删 改
-            # print(message)
+            ##print(message)
             future = asyncio.run_coroutine_threadsafe(
                 Observer.queue.put(message), Observer.loop
             )
@@ -2670,7 +2673,7 @@ class ZhongShu(BaseChanObject, Observer):
                 dp("警告：中枢元素不匹配!!!", self.last_element, obj)
             self.elements.pop()
             if obj.end.mid.bsp:
-                print("消除", obj.end.mid)
+                # print("消除", obj.end.mid)
                 Observer.plot_bsp(self._type, obj.end.mid, obj.end.mid.bsp[-1], False)
 
             # if _from == "analyzer" and self._type == "Duan":
@@ -2694,7 +2697,7 @@ class ZhongShu(BaseChanObject, Observer):
                     and obj.direction is Direction.Up
                 ):
                     # 卖
-                    # print("计算买卖点， 新高", enter.macd, obj.macd, enter, obj)
+                    ##print("计算买卖点， 新高", enter.macd, obj.macd, enter, obj)
                     if self.gg < obj.high:
                         if calc_bc([enter], [obj]):
                             # 背驰
@@ -2705,7 +2708,7 @@ class ZhongShu(BaseChanObject, Observer):
                     self.elements[1].direction is Direction.Down
                     and obj.direction is Direction.Down
                 ):
-                    # print("计算买卖点， 新低", enter.macd, obj.macd, enter, obj)
+                    ##print("计算买卖点， 新低", enter.macd, obj.macd, enter, obj)
                     # 买
                     if self.dd > obj.low:
                         if calc_bc([enter], [obj]):
@@ -2754,13 +2757,6 @@ class ZhongShu(BaseChanObject, Observer):
         zss.append(zs)
         if _from == "analyzer":
             zs.notify_observer(cmd=ZhongShu.CMD_APPEND, obj=zs)
-            with open("zs.txt", "a") as f:
-                f.write(
-                    zs.start.mid.dt.strftime("%Y%m%d")
-                    + ","
-                    + zs.end.mid.dt.strftime("%Y%m%d")
-                    + "\n"
-                )
 
     @staticmethod
     def pop(zss: List["ZhongShu"], zs: "ZhongShu", _from) -> Optional["ZhongShu"]:
@@ -3272,7 +3268,7 @@ class Bitstamp(CZSCAnalyzer):
                 self.symbol, self.freq, _next, _next := _next + self.freq * 1000
             )
             if not data.get("data"):
-                print(data)
+                # print(data)
                 raise ChanException
             for bar in data["data"]["ohlc"]:
                 try:
@@ -3314,13 +3310,15 @@ class Bitstamp(CZSCAnalyzer):
         url = f"https://www.bitstamp.net/api/v2/ohlc/{pair}/?step={step}&limit={length}&start={start}&end={end}"
         resp = s.get(url, timeout=5, proxies=proxies)
         json = resp.json()
-        # print(json)
+        ##print(json)
         return json
 
 
-class CZSCStrategy(bt.Strategy):  # BOLL策略程序
-    buy_price = 0
+class CZSCStrategy(bt.Strategy):
     state = "close"
+    last = ""
+    buy_price = 0
+    max_price = 0
 
     def __init__(self):  # 初始化
         self.data_close = self.datas[0].close  # 指定价格序列
@@ -3351,7 +3349,7 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
             if Observer.sigal in self.signals:
                 return
             self.signals.add(Observer.sigal)
-            # print(t, bar, bst)
+            ##print(t, bar, bst)
         bi = []
         global global_bi
         for i in global_bi:
@@ -3361,12 +3359,15 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
             else:
                 bi[-1] = tmp
         price = self.data.close[0]
+        high = self.data.high[0]
         if self.position:
+            self.max_price = max(self.max_price, high)
             if bi[-1][0] == "Up" and price < float(bi[-1][4]):
                 self.sell(size=self.position.size)
                 self.state = "stop"
             elif price < self.buy_price:
                 self.sell(size=self.position.size)
+                self.last = bi[-1][3]
                 self.state = "close"
         elif self.state == "stop":
             if bi[-1][0] == "Down":
@@ -3377,12 +3378,15 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
                 self.buy_price = price
                 self.state = "open"
         elif len(bi) > 5 and price > float(bi[-1][4]):
-            if self.module2(bi):
+            if self.module2(bi) and (price > self.max_price or self.last != bi[-1][3]):
                 cash = self.broker.getcash()
                 self.buy(size=int(cash / price * 0.9))
                 self.buy_price = price
+                self.max_price = high
                 self.state = "open"
         Observer.sigal = None
+        global global_state
+        global_state = self.state
         return
 
     def module(self, bi: list[list]) -> bool:
@@ -3409,6 +3413,20 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
         if len(bi) < 8 or bi[-1][0] == "Up":
             return False
         bi = bi[-8:]
+        date_format = "%Y%m%d"
+        time_len = [
+            (
+                datetime.datetime.strptime(i[3], date_format)
+                - datetime.datetime.strptime(i[1], date_format)
+            ).days
+            for i in bi
+        ]
+        result = abs(float(bi[2][4]) / float(bi[0][4]) - 1)
+        if result > 0.05:
+            return False
+        result = self.cv_cal(time_len[:3])
+        if result > 0.5 or sum(time_len[:3]) > 110:
+            return False
         len_ = [abs(float(i[2]) - float(i[4])) for i in bi]
         result = self.cv_cal(len_[:3])
         if result > 0.2 or float(bi[3][4]) < float(bi[0][2]):
@@ -3434,7 +3452,8 @@ class CZSCStrategy(bt.Strategy):  # BOLL策略程序
 
     def log(self, txt, dt=None, do_print=False):  # 日志函数
         dt = dt or bt.num2date(self.datas[0].datetime[0])
-        print("%s, %s" % (dt, txt))
+
+    # print("%s, %s" % (dt, txt))
 
     def notify_order(self, order):  # 记录交易执行情况
         if order.status in [order.Submitted, order.Accepted]:
@@ -3494,15 +3513,15 @@ def main_bitstamp(symbol="btcusd", limit=500, freq=Freq.m5):
     return func
 
 
-app = FastAPI()
-# priority_queue = asyncio.PriorityQueue()
-# queue = Observer.queue  # asyncio.Queue()
-app.mount(
-    "/charting_library",
-    StaticFiles(directory="charting_library"),
-    name="charting_library",
-)
-templates = Jinja2Templates(directory="templates")
+# app = FastAPI()
+# # priority_queue = asyncio.PriorityQueue()
+# # queue = Observer.queue  # asyncio.Queue()
+# app.mount(
+#     "/charting_library",
+#     StaticFiles(directory="charting_library"),
+#     name="charting_library",
+# )
+# templates = Jinja2Templates(directory="templates")
 
 
 async def process_queue():
@@ -3511,491 +3530,491 @@ async def process_queue():
         try:
             await handle_message(message)
         except Exception as e:
-            print(f"Error handling message: {e}")
+            # print(f"Error handling message: {e}")
             traceback.print_exc()
         finally:
             Observer.queue.task_done()
 
 
-@app.on_event("startup")
-async def startup_event():
-    # 启动队列处理任务
-    asyncio.create_task(process_queue())
+# @app.on_event("startup")
+# async def startup_event():
+#     # 启动队列处理任务
+#     asyncio.create_task(process_queue())
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            message = json.loads(data)
-            if message["type"] == "ready":
-                exchange = message["exchange"]
-                symbol = message["symbol"]
-                freq = message["freq"]
-                limit = message["limit"]
-                print(message)
-                if Observer.thread is not None:
-                    tmp = Observer.thread
-                    Observer.thread = None
-                    Observer.sigals.clear()
-                    Observer.sigal = None
-                    RawBar.OBJS = []
-                    NewBar.OBJS = []
-                    FenXing.OBJS = []
-                    Bi.OBJS = []
-                    Bi.FAKE = None
-                    Duan.OBJS = []
-                    Duan.DUAN_OBJS = []
-                    ZhongShu.OBJS = []
-                    ZhongShu.BI_OBJS = []
-                    ZhongShu.DUAN_OBJS = []
-                    ZhongShu.DUAN_DUAN_OBJS = []
-                    tmp.join(1)
-                    time.sleep(1)
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await manager.connect(websocket)
+#     try:
+#         while True:
+#             data = await websocket.receive_text()
+#             message = json.loads(data)
+#             if message["type"] == "ready":
+#                 exchange = message["exchange"]
+#                 symbol = message["symbol"]
+#                 freq = message["freq"]
+#                 limit = message["limit"]
+#                 # print(message)
+#                 if Observer.thread is not None:
+#                     tmp = Observer.thread
+#                     Observer.thread = None
+#                     Observer.sigals.clear()
+#                     Observer.sigal = None
+#                     RawBar.OBJS = []
+#                     NewBar.OBJS = []
+#                     FenXing.OBJS = []
+#                     Bi.OBJS = []
+#                     Bi.FAKE = None
+#                     Duan.OBJS = []
+#                     Duan.DUAN_OBJS = []
+#                     ZhongShu.OBJS = []
+#                     ZhongShu.BI_OBJS = []
+#                     ZhongShu.DUAN_OBJS = []
+#                     ZhongShu.DUAN_DUAN_OBJS = []
+#                     tmp.join(1)
+#                     time.sleep(1)
 
-                Observer.thread = Thread(
-                    target=main_bitstamp(symbol=symbol, freq=freq, limit=limit)
-                )  # 使用线程来运行main函数
-                Observer.thread.start()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-
-@app.get("/czsc")
-def static_czsc():
-    with open("czsc.html", "r") as f:
-        return HTMLResponse(f.read())
+#                 Observer.thread = Thread(
+#                     target=main_bitstamp(symbol=symbol, freq=freq, limit=limit)
+#                 )  # 使用线程来运行main函数
+#                 Observer.thread.start()
+#     except WebSocketDisconnect:
+#         manager.disconnect(websocket)
 
 
-@app.get("/")
-async def main_page(
-    request: Request,
-    nol: str = "network",
-    exchange: str = "bitstamp",
-    symbol: str = "btcusd",
-    step: int = 300,
-    limit: int = 500,
-):
-    resolutions = {
-        60: "1",
-        180: "3",
-        300: "5",
-        900: "15",
-        1800: "30",
-        3600: "1H",
-        7200: "2H",
-        14400: "4H",
-        21600: "6H",
-        43200: "12H",
-        86400: "1D",
-        259200: "3D",
-    }
-    if resolutions.get(step) is None:
-        return resolutions
-
-    exchange = "bitstamp"
-
-    # if not (symbol in ("btcusd", )):
-    #    return resolutions
-    print(request.base_url)
-    Observer.CAN = True
-    charting_library = str(
-        request.url_for("charting_library", path="/charting_library.standalone.js")
-    )
-    print(charting_library)
-    return HTMLResponse(
-        """<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <title>TradingView Chart with WebSocket</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
-    <script type="text/javascript" src="$charting_library$"></script>
-    <script type="text/javascript">
-        const shape_ids = new Array(); // id 映射
-        const debug = false;
-        const exchange = "$exchange$";
-        const ticker = "$symbol$";
-        const name = ticker;//"BTCUSD"
-        const description = ticker;//"Bitcoin/USD"
-        const interval = "$interval$";
-        const step = "$step$";
-        const limit = "$limit$";
-        const socket = new WebSocket("ws://localhost:8080/ws");
-
-        socket.onopen = () => {
-            console.log("WebSocket connection established");
-            socket.send(JSON.stringify({
-                type: "ready",
-                exchange: exchange,
-                symbol: name,
-                freq: step,
-                limit: limit
-            }));
-        };
-
-        socket.onclose = () => {
-            console.log("WebSocket connection closed");
-        };
-
-        socket.onerror = (error) => {
-            console.error("WebSocket error:", error);
-        };
-
-        let datafeed = {
-            onReady: (callback) => {
-                console.log("[Datafeed.onReady]: Method call");
-                setTimeout(() => callback({
-                    supports_search: false,
-                    supports_group_request: false,
-                    supports_marks: false,
-                    supports_timescale_marks: true,
-                    supports_time: true,
-                    supported_resolutions: [interval,],//["1s", "1", "3", "5", "6", "12", "24", "30", "48", "64", "128", "1H", "2H", "3H", "4H", "6H", "8H", "12H", "36H", "1D", "2D", "3D", "5D", "12D", "1W"],
-                }));
-            },
-
-            searchSymbols: async (
-                userInput,
-                exchange,
-                symbolType,
-                onResultReadyCallback,
-            ) => {
-                console.log("[Datafeed.searchSymbols]: Method call", userInput, exchange, symbolType);
-
-            },
-
-            resolveSymbol: async (
-                symbolName,
-                onSymbolResolvedCallback,
-                onResolveErrorCallback,
-                extension
-            ) => {
-                console.log("[Datafeed.resolveSymbol]: Method call", symbolName);
-                //return ;
-                const symbolInfo = {
-                    exchange: exchange,
-                    ticker: ticker,
-                    name: name,
-                    description: description,
-                    type: "",
-                    session: "24x7",
-                    timezone: "Asia/Shanghai",
-                    minmov: 1,
-                    pricescale: 100000000, // 精度 数值越高小数点
-                    visible_plots_set: "ohlcv",
-                    has_no_volume: true,
-                    has_weekly_and_monthly: false, // 周线 月线
-                    supported_resolutions: ["1", "3", "5", "15", "30", "1H", "2H", "4H", "6H", "12H", "1D", "3D"],
-                    volume_precision: 1,
-                    data_status: "streaming",
-                    has_intraday: true,
-                    //intraday_multipliers: [5,], //["1", "3", "5", "15", "30", "60", "120", "240", "360", "720"],
-                    has_seconds: false,
-                    //seconds_multipliers: ["1S",],
-                    has_daily: true,
-                    //daily_multipliers: ["1", "3"],
-                    has_ticks: true,
-                    monthly_multipliers: [],
-                    weekly_multipliers: [],
-                };
-                try {
-                    onSymbolResolvedCallback(symbolInfo);
-                } catch (err) {
-                    onResolveErrorCallback(err.message);
-                }
-
-            },
-
-            getBars: async (
-                symbolInfo,
-                resolution,
-                periodParams,
-                onHistoryCallback,
-                onErrorCallback,
-            ) => {
-                const {from, to, firstDataRequest} = periodParams;
-                console.log("[Datafeed.getBars]: Method call", symbolInfo, resolution, from, to, firstDataRequest);
-                try {
-                    onHistoryCallback([], {noData: true});
-
-                } catch (error) {
-                    console.log("[Datafeed.getBars]: Get error", error);
-                    onErrorCallback(error);
-                }
-            },
-
-            subscribeBars: (
-                symbolInfo,
-                resolution,
-                onRealtimeCallback,
-                subscriberUID,
-                onResetCacheNeededCallback,
-            ) => {
-                console.log(
-                    "[Datafeed.subscribeBars]: Method call with subscriberUID:",
-                    symbolInfo,
-                    resolution,
-                    subscriberUID,
-                );
-                socket.onmessage = function (event) {
-                    const message = JSON.parse(event.data);
-                    if (debug) console.info(message);
-                    if (message.type === "realtime") {
-                        const bar = {
-                            time: new Date(message.timestamp).getTime(), // Unix timestamp in milliseconds
-                            close: message.close,
-                            open: message.open,
-                            high: message.high,
-                            low: message.low,
-                            volume: message.volume,
-                        };
-                        onRealtimeCallback(bar);
-                        //createShape(message.shape);
-                    } else if (message.type === "shape") {
-                        if (message.cmd === "bi_append" || message.cmd === "duan_append" || message.cmd === "zs_append" || message.cmd === "feature_append") {
-                            addShapeToChart(message);
-                        } else if (message.cmd === "bi_remove" || message.cmd === "duan_remove" || message.cmd === "zs_remove" || message.cmd === "feature_remove") {
-                            delShapeById(message)
-                        } else if (message.cmd === "bi_modify" || message.cmd === "duan_modify" || message.cmd === "zs_modify" || message.cmd === "feature_modify") {
-                            modifyShape(message)
-                        }
-                    } else {
-                        console.log("未知消息", message);
-                    }
-                };
-            },
-
-            unsubscribeBars: (subscriberUID) => {
-                console.log(
-                    "[Datafeed.unsubscribeBars]: Method call with subscriberUID:",
-                    subscriberUID,
-                );
-                socket.close();
-            }
-        };
+# @app.get("/czsc")
+# def static_czsc():
+#     with open("czsc.html", "r") as f:
+#         return HTMLResponse(f.read())
 
 
-        function addShapeToChart(obj) {
-            if (window.tvWidget) {
-                const shape_id = window.tvWidget.chart().createMultipointShape(obj.points, obj.options);
-                shape_ids [obj.id] = shape_id;
-                const shape = window.tvWidget.chart().getShapeById(shape_id);
-                shape.setProperties(obj.properties);
-                shape.bringToFront();
-                //console.log(obj.id, shape_id);
-                //console.log("add", obj.name, obj.id);
-            }
-        }
+# @app.get("/")
+# async def main_page(
+#     request: Request,
+#     nol: str = "network",
+#     exchange: str = "bitstamp",
+#     symbol: str = "btcusd",
+#     step: int = 300,
+#     limit: int = 500,
+# ):
+#     resolutions = {
+#         60: "1",
+#         180: "3",
+#         300: "5",
+#         900: "15",
+#         1800: "30",
+#         3600: "1H",
+#         7200: "2H",
+#         14400: "4H",
+#         21600: "6H",
+#         43200: "12H",
+#         86400: "1D",
+#         259200: "3D",
+#     }
+#     if resolutions.get(step) is None:
+#         return resolutions
 
-        function delShapeById(obj) {
-            if (window.tvWidget) {
-                try {
-                    const id = shape_ids[obj.id];
-                    delete shape_ids[obj.id];
-                    const shape = window.tvWidget.chart().getShapeById(id);
-                    if (debug) console.log(id, shape);
-                    window.tvWidget.chart().removeEntity(id);
-                    //console.log("del", shapeId, id);
-                } catch (e) {
-                    console.log("删除失败", obj, e)
-                }
+#     exchange = "bitstamp"
 
-            }
-        }
+#     # if not (symbol in ("btcusd", )):
+#     #    return resolutions
+#     # print(request.base_url)
+#     Observer.CAN = True
+#     charting_library = str(
+#         request.url_for("charting_library", path="/charting_library.standalone.js")
+#     )
+#     # print(charting_library)
+#     return HTMLResponse(
+#         """<!DOCTYPE html>
+# <html lang="zh">
+# <head>
+#     <title>TradingView Chart with WebSocket</title>
+#     <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+#     <script type="text/javascript" src="$charting_library$"></script>
+#     <script type="text/javascript">
+#         const shape_ids = new Array(); // id 映射
+#         const debug = false;
+#         const exchange = "$exchange$";
+#         const ticker = "$symbol$";
+#         const name = ticker;//"BTCUSD"
+#         const description = ticker;//"Bitcoin/USD"
+#         const interval = "$interval$";
+#         const step = "$step$";
+#         const limit = "$limit$";
+#         const socket = new WebSocket("ws://localhost:8080/ws");
 
-        function createShape(obj) {
-            if (window.tvWidget) {
-                const shape_id = window.tvWidget.chart().createShape(obj.point, obj.options);
-                shape_ids [obj.id] = shape_id;
-                const shape = window.tvWidget.chart().getShapeById(shape_id);
-                shape.bringToFront();
-                //shape.setProperties(obj.options);
-            }
-        }
+#         socket.onopen = () => {
+#             console.log("WebSocket connection established");
+#             socket.send(JSON.stringify({
+#                 type: "ready",
+#                 exchange: exchange,
+#                 symbol: name,
+#                 freq: step,
+#                 limit: limit
+#             }));
+#         };
 
-        function modifyShape(obj) {
-            const id = shape_ids[obj.id];
-            try {
-                const shape = window.tvWidget.chart().getShapeById(id);
-                if (shape) {
-                    if (debug) console.log(obj);
-                    //console.log(shape.getProperties());
-                    shape.setPoints(obj.points);
-                    shape.setProperties(obj.properties);
-                    shape.bringToFront();
+#         socket.onclose = () => {
+#             console.log("WebSocket connection closed");
+#         };
 
-                } else {
-                    console.log("Shape does not exist.");
-                }
-            } catch (e) {
-                console.log("修改失败", id, obj, e)
-            }
-        }
+#         socket.onerror = (error) => {
+#             console.error("WebSocket error:", error);
+#         };
+
+#         let datafeed = {
+#             onReady: (callback) => {
+#                 console.log("[Datafeed.onReady]: Method call");
+#                 setTimeout(() => callback({
+#                     supports_search: false,
+#                     supports_group_request: false,
+#                     supports_marks: false,
+#                     supports_timescale_marks: true,
+#                     supports_time: true,
+#                     supported_resolutions: [interval,],//["1s", "1", "3", "5", "6", "12", "24", "30", "48", "64", "128", "1H", "2H", "3H", "4H", "6H", "8H", "12H", "36H", "1D", "2D", "3D", "5D", "12D", "1W"],
+#                 }));
+#             },
+
+#             searchSymbols: async (
+#                 userInput,
+#                 exchange,
+#                 symbolType,
+#                 onResultReadyCallback,
+#             ) => {
+#                 console.log("[Datafeed.searchSymbols]: Method call", userInput, exchange, symbolType);
+
+#             },
+
+#             resolveSymbol: async (
+#                 symbolName,
+#                 onSymbolResolvedCallback,
+#                 onResolveErrorCallback,
+#                 extension
+#             ) => {
+#                 console.log("[Datafeed.resolveSymbol]: Method call", symbolName);
+#                 //return ;
+#                 const symbolInfo = {
+#                     exchange: exchange,
+#                     ticker: ticker,
+#                     name: name,
+#                     description: description,
+#                     type: "",
+#                     session: "24x7",
+#                     timezone: "Asia/Shanghai",
+#                     minmov: 1,
+#                     pricescale: 100000000, // 精度 数值越高小数点
+#                     visible_plots_set: "ohlcv",
+#                     has_no_volume: true,
+#                     has_weekly_and_monthly: false, // 周线 月线
+#                     supported_resolutions: ["1", "3", "5", "15", "30", "1H", "2H", "4H", "6H", "12H", "1D", "3D"],
+#                     volume_precision: 1,
+#                     data_status: "streaming",
+#                     has_intraday: true,
+#                     //intraday_multipliers: [5,], //["1", "3", "5", "15", "30", "60", "120", "240", "360", "720"],
+#                     has_seconds: false,
+#                     //seconds_multipliers: ["1S",],
+#                     has_daily: true,
+#                     //daily_multipliers: ["1", "3"],
+#                     has_ticks: true,
+#                     monthly_multipliers: [],
+#                     weekly_multipliers: [],
+#                 };
+#                 try {
+#                     onSymbolResolvedCallback(symbolInfo);
+#                 } catch (err) {
+#                     onResolveErrorCallback(err.message);
+#                 }
+
+#             },
+
+#             getBars: async (
+#                 symbolInfo,
+#                 resolution,
+#                 periodParams,
+#                 onHistoryCallback,
+#                 onErrorCallback,
+#             ) => {
+#                 const {from, to, firstDataRequest} = periodParams;
+#                 console.log("[Datafeed.getBars]: Method call", symbolInfo, resolution, from, to, firstDataRequest);
+#                 try {
+#                     onHistoryCallback([], {noData: true});
+
+#                 } catch (error) {
+#                     console.log("[Datafeed.getBars]: Get error", error);
+#                     onErrorCallback(error);
+#                 }
+#             },
+
+#             subscribeBars: (
+#                 symbolInfo,
+#                 resolution,
+#                 onRealtimeCallback,
+#                 subscriberUID,
+#                 onResetCacheNeededCallback,
+#             ) => {
+#                 console.log(
+#                     "[Datafeed.subscribeBars]: Method call with subscriberUID:",
+#                     symbolInfo,
+#                     resolution,
+#                     subscriberUID,
+#                 );
+#                 socket.onmessage = function (event) {
+#                     const message = JSON.parse(event.data);
+#                     if (debug) console.info(message);
+#                     if (message.type === "realtime") {
+#                         const bar = {
+#                             time: new Date(message.timestamp).getTime(), // Unix timestamp in milliseconds
+#                             close: message.close,
+#                             open: message.open,
+#                             high: message.high,
+#                             low: message.low,
+#                             volume: message.volume,
+#                         };
+#                         onRealtimeCallback(bar);
+#                         //createShape(message.shape);
+#                     } else if (message.type === "shape") {
+#                         if (message.cmd === "bi_append" || message.cmd === "duan_append" || message.cmd === "zs_append" || message.cmd === "feature_append") {
+#                             addShapeToChart(message);
+#                         } else if (message.cmd === "bi_remove" || message.cmd === "duan_remove" || message.cmd === "zs_remove" || message.cmd === "feature_remove") {
+#                             delShapeById(message)
+#                         } else if (message.cmd === "bi_modify" || message.cmd === "duan_modify" || message.cmd === "zs_modify" || message.cmd === "feature_modify") {
+#                             modifyShape(message)
+#                         }
+#                     } else {
+#                         console.log("未知消息", message);
+#                     }
+#                 };
+#             },
+
+#             unsubscribeBars: (subscriberUID) => {
+#                 console.log(
+#                     "[Datafeed.unsubscribeBars]: Method call with subscriberUID:",
+#                     subscriberUID,
+#                 );
+#                 socket.close();
+#             }
+#         };
 
 
-        function initOnReady() {
-            //console.log("init widget");
-            const widget = (window.tvWidget = new TradingView.widget({
-                symbol: exchange + ":" + description, // Default symbol
-                interval: interval, // Default interval
-                timezone: "Asia/Shanghai",
-                fullscreen: true, // Displays the chart in the fullscreen mode
-                container: "tv_chart_container", // Reference to an attribute of the DOM element
-                datafeed: datafeed,
-                library_path: "charting_library/",
-                locale: "zh",
-                theme: "dark",
-                debug: false,
-                timeframe: "3D",
-                user_id: "public_user_id",
-                client_id: "yourserver.com",
-                favorites: {
-                    intervals: ["1", "3", "5"],
-                    drawingTools: ["LineToolPath", "LineToolRectangle", "LineToolTrendLine"],
-                },
-                disabled_features: [
-                    "use_localstorage_for_settings", // 本地设置
-                    "header_symbol_search", // 搜索
-                    "header_undo_redo", // 重做
-                    "header_screenshot", // 截图
-                    //"header_resolutions",// 周期
-                    "header_compare", // 对比叠加
-                    "header_chart_type",
-                    "go_to_date", // 日期跳转
-                ],
-                time_frames: [
-                    {text: "3d", resolution: "5", description: "3 Days"},
-                    {text: "7d", resolution: "5", description: "7 Days"},
-                ],
-            }));
-            widget.headerReady().then(function () {
-                //widget.activeChart().createStudy("MACD");
+#         function addShapeToChart(obj) {
+#             if (window.tvWidget) {
+#                 const shape_id = window.tvWidget.chart().createMultipointShape(obj.points, obj.options);
+#                 shape_ids [obj.id] = shape_id;
+#                 const shape = window.tvWidget.chart().getShapeById(shape_id);
+#                 shape.setProperties(obj.properties);
+#                 shape.bringToFront();
+#                 //console.log(obj.id, shape_id);
+#                 //console.log("add", obj.name, obj.id);
+#             }
+#         }
 
-                function createHeaderButton(text, title, clickHandler, options) {
-                    const button = widget.createButton(options);
-                    button.setAttribute("title", title);
-                    button.textContent = text;
-                    button.addEventListener("click", clickHandler);
-                }
+#         function delShapeById(obj) {
+#             if (window.tvWidget) {
+#                 try {
+#                     const id = shape_ids[obj.id];
+#                     delete shape_ids[obj.id];
+#                     const shape = window.tvWidget.chart().getShapeById(id);
+#                     if (debug) console.log(id, shape);
+#                     window.tvWidget.chart().removeEntity(id);
+#                     //console.log("del", shapeId, id);
+#                 } catch (e) {
+#                     console.log("删除失败", obj, e)
+#                 }
 
-                createHeaderButton("笔买卖点", "显示隐藏买卖点", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "arrow_up" || name === "arrow_down") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.title === "BiFS" || properties.title === "BiSS" || properties.title === "BiTS"
-                                || properties.title === "BiFB" || properties.title === "BiSB" || properties.title === "BiTB"
-                            )
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
+#             }
+#         }
 
-                createHeaderButton("段买卖点", "显示隐藏买卖点", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "arrow_up" || name === "arrow_down") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.title === "DuanFS" || properties.title === "DuanSS" || properties.title === "DuanTS"
-                                || properties.title === "DuanFB" || properties.title === "DuanSB" || properties.title === "DuanTB"
-                            )
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
+#         function createShape(obj) {
+#             if (window.tvWidget) {
+#                 const shape_id = window.tvWidget.chart().createShape(obj.point, obj.options);
+#                 shape_ids [obj.id] = shape_id;
+#                 const shape = window.tvWidget.chart().getShapeById(shape_id);
+#                 shape.bringToFront();
+#                 //shape.setProperties(obj.options);
+#             }
+#         }
 
-                createHeaderButton("特征序列", "显示隐藏特征序列", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "trend_line") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.text.indexOf("feature") === 0)
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
+#         function modifyShape(obj) {
+#             const id = shape_ids[obj.id];
+#             try {
+#                 const shape = window.tvWidget.chart().getShapeById(id);
+#                 if (shape) {
+#                     if (debug) console.log(obj);
+#                     //console.log(shape.getProperties());
+#                     shape.setPoints(obj.points);
+#                     shape.setProperties(obj.properties);
+#                     shape.bringToFront();
 
-                createHeaderButton("笔", "显示隐藏笔", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "trend_line") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.text.indexOf("bi") === 0)
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
-                createHeaderButton("段", "显示隐藏段", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "trend_line") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.text.indexOf("duan") === 0)
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
-                createHeaderButton("笔中枢", "显示隐藏笔中枢", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "rectangle") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.text.indexOf("Bizs") === 0)
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
-                createHeaderButton("段中枢", "显示隐藏段中枢", function () {
-                    widget.activeChart().getAllShapes().forEach(({name, id}) => {
-                        if (name === "rectangle") {
-                            const shape = window.tvWidget.chart().getShapeById(id);
-                            const properties = shape.getProperties();
-                            if (properties.text.indexOf("Duanzs") === 0)
-                                shape.setProperties({visible: !properties.visible})
-                        }
-                    });
-                });
-                widget.onChartReady(function () {
-                    // https://www.tradingview.com/charting-library-docs/v26/api/interfaces/Charting_Library.SubscribeEventsMap/
-                    widget.subscribe("onTimescaleMarkClick", function (clientX, clientY, pageX, pageY, screenX, screenY) {
-                        console.log("[onTimescaleMarkClick]", clientX, clientY, pageX, pageY, screenX, screenY)
-                    })
-                    widget.subscribe("drawing_event", function (sourceId, drawingEventType) {
-                        // properties_changed, remove, points_changed, click
-                        if (debug) console.log("[drawing_event]", "id:", sourceId, "event type:", drawingEventType)
-                        if (drawingEventType.indexOf("click") === 0) {
-                            const shape = widget.activeChart().getShapeById(sourceId);
-                            const properties = shape.getProperties();
-                            const points = shape.getPoints();
-                            const toolname = shape._source.toolname;
-                            if (toolname === "LineToolTrendLine") {
-                                shape.setProperties({showLabel: !properties.showLabel})
-                            }
-                            console.log(toolname, points, properties);
-                        }
-                    })
-                });
-            });
-        }
+#                 } else {
+#                     console.log("Shape does not exist.");
+#                 }
+#             } catch (e) {
+#                 console.log("修改失败", id, obj, e)
+#             }
+#         }
 
-        window.addEventListener("DOMContentLoaded", initOnReady, false);
-    </script>
-</head>
-<body style="margin:0px;">
-<div id="tv_chart_container"></div>
-</body>
-</html>
-""".replace(
-            "$charting_library$", charting_library
-        )
-        .replace("$exchange$", exchange)
-        .replace("$symbol$", symbol)
-        .replace("$interval$", resolutions.get(step))
-        .replace("$limit$", str(limit))
-        .replace("$step$", str(step))
-    )
+
+#         function initOnReady() {
+#             //console.log("init widget");
+#             const widget = (window.tvWidget = new TradingView.widget({
+#                 symbol: exchange + ":" + description, // Default symbol
+#                 interval: interval, // Default interval
+#                 timezone: "Asia/Shanghai",
+#                 fullscreen: true, // Displays the chart in the fullscreen mode
+#                 container: "tv_chart_container", // Reference to an attribute of the DOM element
+#                 datafeed: datafeed,
+#                 library_path: "charting_library/",
+#                 locale: "zh",
+#                 theme: "dark",
+#                 debug: false,
+#                 timeframe: "3D",
+#                 user_id: "public_user_id",
+#                 client_id: "yourserver.com",
+#                 favorites: {
+#                     intervals: ["1", "3", "5"],
+#                     drawingTools: ["LineToolPath", "LineToolRectangle", "LineToolTrendLine"],
+#                 },
+#                 disabled_features: [
+#                     "use_localstorage_for_settings", // 本地设置
+#                     "header_symbol_search", // 搜索
+#                     "header_undo_redo", // 重做
+#                     "header_screenshot", // 截图
+#                     //"header_resolutions",// 周期
+#                     "header_compare", // 对比叠加
+#                     "header_chart_type",
+#                     "go_to_date", // 日期跳转
+#                 ],
+#                 time_frames: [
+#                     {text: "3d", resolution: "5", description: "3 Days"},
+#                     {text: "7d", resolution: "5", description: "7 Days"},
+#                 ],
+#             }));
+#             widget.headerReady().then(function () {
+#                 //widget.activeChart().createStudy("MACD");
+
+#                 function createHeaderButton(text, title, clickHandler, options) {
+#                     const button = widget.createButton(options);
+#                     button.setAttribute("title", title);
+#                     button.textContent = text;
+#                     button.addEventListener("click", clickHandler);
+#                 }
+
+#                 createHeaderButton("笔买卖点", "显示隐藏买卖点", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "arrow_up" || name === "arrow_down") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.title === "BiFS" || properties.title === "BiSS" || properties.title === "BiTS"
+#                                 || properties.title === "BiFB" || properties.title === "BiSB" || properties.title === "BiTB"
+#                             )
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+
+#                 createHeaderButton("段买卖点", "显示隐藏买卖点", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "arrow_up" || name === "arrow_down") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.title === "DuanFS" || properties.title === "DuanSS" || properties.title === "DuanTS"
+#                                 || properties.title === "DuanFB" || properties.title === "DuanSB" || properties.title === "DuanTB"
+#                             )
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+
+#                 createHeaderButton("特征序列", "显示隐藏特征序列", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "trend_line") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.text.indexOf("feature") === 0)
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+
+#                 createHeaderButton("笔", "显示隐藏笔", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "trend_line") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.text.indexOf("bi") === 0)
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+#                 createHeaderButton("段", "显示隐藏段", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "trend_line") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.text.indexOf("duan") === 0)
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+#                 createHeaderButton("笔中枢", "显示隐藏笔中枢", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "rectangle") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.text.indexOf("Bizs") === 0)
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+#                 createHeaderButton("段中枢", "显示隐藏段中枢", function () {
+#                     widget.activeChart().getAllShapes().forEach(({name, id}) => {
+#                         if (name === "rectangle") {
+#                             const shape = window.tvWidget.chart().getShapeById(id);
+#                             const properties = shape.getProperties();
+#                             if (properties.text.indexOf("Duanzs") === 0)
+#                                 shape.setProperties({visible: !properties.visible})
+#                         }
+#                     });
+#                 });
+#                 widget.onChartReady(function () {
+#                     // https://www.tradingview.com/charting-library-docs/v26/api/interfaces/Charting_Library.SubscribeEventsMap/
+#                     widget.subscribe("onTimescaleMarkClick", function (clientX, clientY, pageX, pageY, screenX, screenY) {
+#                         console.log("[onTimescaleMarkClick]", clientX, clientY, pageX, pageY, screenX, screenY)
+#                     })
+#                     widget.subscribe("drawing_event", function (sourceId, drawingEventType) {
+#                         // properties_changed, remove, points_changed, click
+#                         if (debug) console.log("[drawing_event]", "id:", sourceId, "event type:", drawingEventType)
+#                         if (drawingEventType.indexOf("click") === 0) {
+#                             const shape = widget.activeChart().getShapeById(sourceId);
+#                             const properties = shape.getProperties();
+#                             const points = shape.getPoints();
+#                             const toolname = shape._source.toolname;
+#                             if (toolname === "LineToolTrendLine") {
+#                                 shape.setProperties({showLabel: !properties.showLabel})
+#                             }
+#                             console.log(toolname, points, properties);
+#                         }
+#                     })
+#                 });
+#             });
+#         }
+
+#         window.addEventListener("DOMContentLoaded", initOnReady, false);
+#     </script>
+# </head>
+# <body style="margin:0px;">
+# <div id="tv_chart_container"></div>
+# </body>
+# </html>
+# """.replace(
+#             "$charting_library$", charting_library
+#         )
+#         .replace("$exchange$", exchange)
+#         .replace("$symbol$", symbol)
+#         .replace("$interval$", resolutions.get(step))
+#         .replace("$limit$", str(limit))
+#         .replace("$step$", str(step))
+#     )
 
 
 async def handle_message(message: dict):
@@ -4070,7 +4089,7 @@ def huice():
         # cerebro.addsizer(bt.sizers.FixedSize, stake=100)
         cerebro.run(runonce=False)
         end_value = cerebro.broker.getvalue()
-        print("期末总资金: %.2f" % end_value)
+    # print("期末总资金: %.2f" % end_value)
 
 
 class MyCSVData(GenericCSVData):
@@ -4096,8 +4115,6 @@ Observer.TIME = 0.02
 def main(code, from_date, to_date):
     global global_bi
     global_bi = []
-    with open("zs.txt", "w") as f:
-        pass
     with open("bi.txt", "w") as f:
         pass
     # bit = main_load_file("btcusd-300-1713295800-1715695500.dat")
@@ -4127,13 +4144,13 @@ def main(code, from_date, to_date):
     # cerebro.addsizer(bt.sizers.FixedSize, stake=100)
     cerebro.run(runonce=False)
     end_value = cerebro.broker.getvalue()
-    print("期末总资金: %.2f" % end_value)
+    # print("期末总资金: %.2f" % end_value)
     tq07_corUp, tq07_corDown = ["#E1440F", "#B0F76D"]
     tq_ksty07 = dict(
         volup=tq07_corUp, voldown=tq07_corDown, barup=tq07_corUp, bardown=tq07_corDown
     )
-    # cerebro.plot(style="candle", **tq_ksty07) 
-    print(len(Observer.sigals))
+    # cerebro.plot(style="candle", **tq_ksty07)
+    # print(len(Observer.sigals))
 
     # 计算总收益率
     total_return_percentage = ((end_value - start_cash) / start_cash) * 100
@@ -4155,5 +4172,56 @@ def main(code, from_date, to_date):
     return annualized_return_percentage
 
 
+def main2(code, from_date, to_date):
+    global global_bi
+    global global_state
+    global_bi = []
+    global_state = ""
+    with open("bi.txt", "w") as f:
+        pass
+    # bit = main_load_file("btcusd-300-1713295800-1715695500.dat")
+    cerebro = bt.Cerebro()
+    # with open("btcusd-300-1713295800-1715695500.dat", "rb") as f:
+    #     cerebro.adddata(
+    #         bt.feeds.PandasData(
+    #             dataname=bs2df(f.read()), timeframe=bt.TimeFrame.Minutes
+    #         )
+    #     )
+    # 加载数据
+
+    fromdate = datetime.datetime.strptime(from_date, "%Y%m%d")
+    todate = datetime.datetime.strptime(to_date, "%Y%m%d")
+    data = MyCSVData(
+        dataname="stock_data.csv",
+        fromdate=fromdate,
+        todate=todate,
+    )
+
+    # 添加数据到回测引擎
+    cerebro.adddata(data)
+    cerebro.addstrategy(CZSCStrategy)
+    start_cash = 10000
+    cerebro.broker.setcash(start_cash)
+    cerebro.broker.setcommission(commission=0.0005)
+    # cerebro.addsizer(bt.sizers.FixedSize, stake=100)
+    cerebro.run(runonce=False)
+    end_value = cerebro.broker.getvalue()
+    # print("期末总资金: %.2f" % end_value)
+    # cerebro.plot(style="candle", **tq_ksty07)
+    # print(len(Observer.sigals))
+
+    # 计算总收益率
+    total_return_percentage = ((end_value - start_cash) / start_cash) * 100
+
+    # 假设回测周期是从date1到date2，计算总天数
+    total_days = (todate - fromdate).days
+    # 假设一年有365天，计算平均年化收益率
+    annualized_return_percentage = (
+        (1 + total_return_percentage / 100) ** (365 / total_days)
+    ) - 1
+    annualized_return_percentage *= 100  # 转换为百分比形式
+    return global_state
+
+
 if __name__ == "__main__":
-    main("002250", "20220830", "20230830")
+    main("605376", "20230830", "20240830")

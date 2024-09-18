@@ -273,6 +273,6 @@ def main(date1, date2, code):
 
 
 if __name__ == "__main__":
-    date1 = "20220830"
-    date2 = "20230830"
+    date1 = "20210830"
+    date2 = "20220830"
     main(date1, date2, "688298")
