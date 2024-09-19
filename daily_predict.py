@@ -6,7 +6,7 @@ import prepare
 
 
 def main():
-    now = datetime(2024, 2, 29)
+    now = datetime.now()
     days_ago = now - timedelta(days=360)
     tomorrow = now + timedelta(days=1)
     strdate = tomorrow.strftime("%Y%m%d")
@@ -39,6 +39,8 @@ def main():
             prepare.main(i, strdate2, strdate)
             new_state = chan.main2(i, strdate2, strdate)
             if new_state != state:
+                if (new_state == "stop" or new_state == "close") and state != "open":
+                    continue
                 stdout += new_state + " " + i + "\n"
             if new_state != "close":
                 with open("log.txt", "a") as f:
@@ -48,7 +50,7 @@ def main():
         print("已处理 " + str(cnt) + ", 总共 " + str(len(stock_list)))
 
     print(stdout)
-    input("按任意键继续...")
+    input("按回车退出...")
 
 
 if __name__ == "__main__":
