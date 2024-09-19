@@ -25,11 +25,9 @@ def main():
             state = code_list[1]
             log_map[code] = state
 
-    with open("log.txt", "w") as f:
-        pass
-
     cnt = 0
     stdout = ""
+    fileout = ""
     for i in stock_list:
         cnt += 1
         state = "close"
@@ -43,12 +41,12 @@ def main():
                     continue
                 stdout += new_state + " " + i + "\n"
             if new_state != "close":
-                with open("log.txt", "a") as f:
-                    f.write(" ".join([i, new_state]) + "\n")
+                fileout += " ".join([i, new_state]) + "\n"
         except:
             pass
         print("已处理 " + str(cnt) + ", 总共 " + str(len(stock_list)))
-
+    with open("log.txt", "w") as f:
+        f.write(fileout)
     print(stdout)
     input("按回车退出...")
 

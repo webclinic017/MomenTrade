@@ -1388,11 +1388,11 @@ class Bi(BaseChanObject, Observer):
         bi.done = True
         bis.append(bi)
         if _from == "analyzer":
-            with open("bi.txt", "a", encoding="utf-8") as f:
-                f.write(
-                    f"{bi.direction},{bi.start.dt.strftime('%Y%m%d')},{bi.start.speck},"
-                    f"{bi.end.dt.strftime('%Y%m%d')},{bi.end.speck}\n"
-                )
+            # with open("bi.txt", "a", encoding="utf-8") as f:
+            #     f.write(
+            #         f"{bi.direction},{bi.start.dt.strftime('%Y%m%d')},{bi.start.speck},"
+            #         f"{bi.end.dt.strftime('%Y%m%d')},{bi.end.speck}\n"
+            #     )
             global global_bi
             global_bi.append(
                 f"{bi.direction},{bi.start.dt.strftime('%Y%m%d')},{bi.start.speck},"
@@ -4115,8 +4115,8 @@ Observer.TIME = 0.02
 def main(code, from_date, to_date):
     global global_bi
     global_bi = []
-    with open("bi.txt", "w") as f:
-        pass
+    # with open("bi.txt", "w") as f:
+    #     pass
     # bit = main_load_file("btcusd-300-1713295800-1715695500.dat")
     cerebro = bt.Cerebro()
     # with open("btcusd-300-1713295800-1715695500.dat", "rb") as f:
@@ -4177,8 +4177,8 @@ def main2(code, from_date, to_date):
     global global_state
     global_bi = []
     global_state = ""
-    with open("bi.txt", "w") as f:
-        pass
+    # with open("bi.txt", "w") as f:
+    #     pass
     # bit = main_load_file("btcusd-300-1713295800-1715695500.dat")
     cerebro = bt.Cerebro()
     # with open("btcusd-300-1713295800-1715695500.dat", "rb") as f:
