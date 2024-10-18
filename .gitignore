@@ -9,3 +9,4 @@ build/
 *.zip
 zs.txt
 bi.txt
+venv/
